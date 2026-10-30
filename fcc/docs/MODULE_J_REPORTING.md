@@ -1,6 +1,6 @@
 # Module J: SSA Accounting Support (Ledger and Annual Report Draft)
 
-Rewritten 2026-10-30 to match SSA requirements. Verbatim source text is in
+Rewritten 2026-10-30 to match SSA requirements; updated the same day against Form SSA-6234-F6 (08-2013). Verbatim source text is in
 `SSA_SOURCE_QUOTES.md` (the section numbers below, such as §11, refer to that file).
 
 ## Source tags
@@ -12,8 +12,9 @@ Every requirement line carries one tag:
 | `[REG]` | 20 CFR § 404.2065 / § 416.665 (binding regulation) |
 | `[POMS <section>]` | SSA staff instructions; shows how SSA applies the rules |
 | `[DESIGN]` | FCC's own choice. SSA does not require it. Can be changed freely. |
+| `[FORM 2C]` etc. | Form SSA-6234-F6 (08-2013), question number given (§12) |
 | `[INFERENCE]` | Reasoned from SSA text, not stated by SSA. Verify before relying on it. |
-| `[UNVERIFIED]` | Comes from a source not retrieved (the Org Guide, the SSA-6234 form itself). Check against the form you receive. |
+| `[UNVERIFIED]` | Comes from a source not retrieved (the Org Guide). |
 
 ## What changed from the previous Module J
 
@@ -23,8 +24,8 @@ Every requirement line carries one tag:
 | Ledger column list (receipt_no, etc.) | Columns now follow D.3: date, whom paid, amount, deposit by program, interest, transfers, share of collective payments. `receipt_no` is kept as optional | §11. SSA's sample ledger exhibit was not retrieved, so its layout is not binding |
 | `benefits_received` by program | Moved to the ledger (SS and SSI deposits listed separately); report uses Total Accountable Amount | §11 D.3.a; TAA is printed by SSA (§5) |
 | *(missing)* beginning balance | Added as `prior_conserved_funds`, part of TAA | §5 |
-| `spent_by_purpose` by economic_purpose | Report now uses the form's buckets: food and housing / other (personal needs) / saved. `economic_purpose` stays in the ledger only | §8; purpose detail is `[DESIGN]` |
-| `saved` (Module F, single-counted) | Now `saved_end_of_period` **including interest** | Form instructions (`[UNVERIFIED]`); interest belongs to beneficiary (§10, §11) |
+| `spent_by_purpose` by economic_purpose | Report now uses the form's buckets: food and housing (2C) / other things (2D) / saved (2E). `economic_purpose` stays in the ledger only | §8; purpose detail is `[DESIGN]` |
+| `saved` (Module F, single-counted) | Now `saved_end_of_period` **including interest** | `[FORM 2E]`; interest belongs to beneficiary (§10, §11) |
 | *(missing)* fee | Added: fee collected yes/no and amount, capped at SSA's Maximum Fee Amount | §6 Q2B, §5 MFA |
 | *(missing)* where lived, who decided | Added: `custody` and `decision_maker` | `[REG]` (c)(1)–(2); §6 Q1, Q2 |
 | *(missing)* how savings are held and titled | Added: `conserved_funds_holdings` | `[REG]` (c)(4); §6 Q3–4 |
@@ -39,7 +40,10 @@ Every requirement line carries one tag:
 
 ```text
 COVERAGE_MIN                = 0.90     // [POMS GN 00605.070, .040] §8, §9
-INSTITUTION_PERSONAL_MIN    = 360.00   // [POMS GN 00605.070] §8, per report period
+INSTITUTION_PERSONAL_MIN    = 360.00   // [FORM 2D] "at least $360 a year"; [POMS GN 00605.070] §8
+REPORT_ROUNDING             = WHOLE_DOLLARS  // [FORM instr. 4] "dollars only. Do not show cents."
+                                             // rounding method not stated; form example 1,540.30 → 1,540.
+                                             // FCC keeps cents internally, rounds half-up on the draft only [DESIGN]
 SSI_CONSERVED_ALERT         = 2000.00  // [POMS GN 00605.001, .070] §3, §8 (Title XVI / concurrent only)
 TITLING_REVIEW_THRESHOLD    = 500.00   // [POMS GN 00605.070] §8, Q4 applies only above this
 INTEREST_STRICT_THRESHOLD   = 10.00    // [POMS GN 00603.020 D.3] §11, per quarter, whole collective account
@@ -75,7 +79,10 @@ RECORD ledger_entry :
     collective_payment_share        //   this beneficiary's part of it    [POMS D.3.b "individual dollar amount of any total collectively paid"]
     destination_account             // REQUIRED for TRANSFER_OUT / TRANSFER_IN  [POMS D.3.d]
     original_entry_ref              // REQUIRED for REFUND                [DESIGN]
-    use_category                    // FOOD_HOUSING | OTHER, REQUIRED for EXPENDITURE  (feeds J.4)  [INFERENCE: form buckets]
+    use_category                    // FOOD_HOUSING | OTHER, REQUIRED for EXPENDITURE  (feeds J.4)
+                                    //   FOOD_HOUSING = [FORM 2C] "food and housing"
+                                    //   OTHER = [FORM 2D] "clothing, education, medical and dental expenses,
+                                    //           recreation, or personal items"
     economic_purpose                // optional finer detail              [DESIGN]
     source_document_ref             // receipt, check, statement line; optional  [DESIGN]
     receipt_no                      // optional                           [DESIGN]
@@ -188,23 +195,34 @@ FUNCTION annual_report_draft(participant, report_period) :
     fee_collected     = Σ FEE                                                     // [POMS GN 00605.065] §6 Q2B
     saved_end_of_period = closing balance on last day of report_period,
                           INCLUDING interest and conserved funds held elsewhere (CDs, savings)
-                          // includes interest: form instructions  [UNVERIFIED]
+                          // includes interest: [FORM 2E] "including any interest earned"
                           // includes CDs: [POMS GN 00603.020 D.3.d] "reflect this CD as conserved funds"
 
     RETURN {
       label : "Reporting draft: supports the SSA-6234; the payee completes and signs the form",
       report_period,
       total_accountable_amount : { computed: TAA_computed, printed: TAA_printed },
-      custody : residence(s) during report_period with dates          // [REG] (c)(1); §6 Q1; custody = "living with" §7
-      decision_maker : who decided how funds were used or saved       // [REG] (c)(2); §6 Q2
-      use_of_benefits : {                                             // [REG] (c)(3); §6 Q2
-          food_and_housing : used_food_housing,                       // [INFERENCE] form bucket (SSA-623 Q3B equivalent)
-          other            : used_other,                              // [INFERENCE] form bucket (SSA-623 Q3C equivalent)
-          saved            : saved_end_of_period                      // SSA-623 Q3D equivalent, §8
+      custody : {                                                     // [REG] (c)(1); [FORM 1]
+          same_for_whole_period : yes/no,   // "live alone, or with the same person, or in the same institution"
+          changes : [ { date, from, to } ], current_address   // if NO: explain + current address in REMARKS
       },
-      fee : { collected: fee_collected > 0, amount: fee_collected,    // §6 Q2B
+      decision_maker : { payee_decided : yes/no, explanation }        // [REG] (c)(2); [FORM 2A]; if NO, explain in REMARKS
+      use_of_benefits : {                                             // [REG] (c)(3); §6 Q2
+          food_and_housing : used_food_housing,                       // [FORM 2C]
+          other            : used_other,                              // [FORM 2D]
+          saved            : saved_end_of_period                      // [FORM 2E]; "Show zeroes if you did not save"
+      },
+      fee : { collected: fee_collected > 0, amount: fee_collected,    // [FORM 2B]; includes payee OR guardianship fees
               max_authorized: MFA printed on form },                  // §5
-      conserved_funds_holdings : [ { type, institution, title, amount } ]   // [REG] (c)(4); §6 Q3–4
+      conserved_funds_holdings : [ {                                  // [REG] (c)(4); [FORM 3, 4]; only if saved > 0
+          type  : SAVINGS_CHECKING | US_SAVINGS_BONDS | CERTIFICATE_OF_DEPOSIT
+                  | COLLECTIVE_SAVINGS_CHECKING | TREASURY_BILLS | OTHER,       // [FORM 3A]
+          title : BENEFICIARY_BY_PAYEE | PAYEE_FOR_BENEFICIARY | OTHER,          // [FORM 3B]
+          other_description,   // [FORM 4A] cash, T-bills, fund name for mutual funds
+          other_title,         // [FORM 4B] or "none"
+          amount } ],
+      remarks : [ text ],     // [FORM] REMARKS: custody change, payee did not decide, personal needs < $360
+      signer  : { name, job_title }   // [FORM 4C/4D, items 5–6]: an authorized person signs; penalty of perjury
       reconciliation : {                                              // [DESIGN]: the identity the form numbers must satisfy
           prior_conserved_funds + benefits_received + interest + refunds_not_netted
           − used_food_housing − used_other − fee_collected − returns_to_ssa
@@ -217,13 +235,16 @@ FUNCTION annual_report_draft(participant, report_period) :
 
 **Open design questions** (no SSA answer in the retrieved sources):
 
-1. Whether the fee counts inside "use of benefits" totals or only in Q2B. The draft keeps it separate.
-2. How the SSA-6234's questions are numbered and worded. GN 00605.065 says it is "similar" to the
-   SSA-623 and lists Q1 custody, Q2 A–E use of benefits (2B = fee), Q3–4 conserved funds. The labels
-   for food/housing and other are `[INFERENCE]` until checked against the actual form.
-3. Whether refunds are netted against spending (chosen here) or shown separately, as Chunk 8 T-12 has it.
-   The form has no refund line, so netting keeps the form arithmetic simple. T-12 needs to be
-   reconciled with this choice.
+1. Whether the fee counts inside the 90% coverage check. On the SSA-623, POMS adds 3B + 3C + 3D
+   (§8). On the SSA-6234 the fee is its own question (2B), so the matching sum is presumably
+   2C + 2D + 2E, which leaves the fee out. `[INFERENCE]` A large fee could then make the check fail
+   even when every dollar is accounted for. The draft reports the check both ways.
+2. Whether refunds are netted against spending (chosen here) or shown separately, as Chunk 8 T-12 has it.
+   The form has no refund line (§12), so netting is the only way a refund can reach the form.
+   T-12 needs to be reconciled with this choice.
+3. Which records to keep for how long. The form says "should be kept for two years from the time you
+   file" (§12). The Compendium flagged "2 years" vs. "2 calendar years" in the Org Guide. Two years
+   from filing is the longest reading among the retrieved sources.
 
 ---
 
@@ -233,9 +254,11 @@ These reproduce how SSA screens a returned report, so problems are fixed before 
 
 ```text
 FUNCTION screening_checks(draft, participant) :
-    covered = used_food_housing + used_other + saved_end_of_period
+    covered          = used_food_housing + used_other + saved_end_of_period        // 2C + 2D + 2E
+    covered_with_fee = covered + fee_collected                                      // + 2B
     IF covered < COVERAGE_MIN × TAA_computed                            // [POMS GN 00605.070, .040] §8, §9
         → finding REVIEW_REQUIRED "less than 90% of TAA accounted for; SSA may require a face-to-face interview"
+          (state whether covered_with_fee clears 90%; see open question 1)
 
     IF participant.resides_in_institution
        AND ( used_other = 0
@@ -243,7 +266,8 @@ FUNCTION screening_checks(draft, participant) :
                  AND used_other + saved_end_of_period < MIN(INSTITUTION_PERSONAL_MIN, TAA_computed)) )
        // SSA-623 3C rule: under $360 (zero not acceptable) unless 3C + 3D reach $360 or the TAA
         → finding REVIEW_REQUIRED "personal needs below $360; explain how personal needs were met"   // §8
-        // [INFERENCE] the "other" bucket corresponds to 3C
+        // [FORM 2D] note: "you should spend at least $360 a year … If you spent less than $360, explain under REMARKS"
+        // The 2E (saved) half of this test is POMS's SSA-623 rule applied to the 6234 [INFERENCE]
 
     IF participant.program IN {SSI, CONCURRENT} AND saved_end_of_period >= SSI_CONSERVED_ALERT
         → finding ALERT "conserved funds ≥ $2,000; SSA will develop continuing SSI eligibility"     // §3, §8

@@ -6,10 +6,10 @@ POMS tables are shown one row per line, with cells separated by " | " (or "Label
 In the GN 00605.070 3D rows, the pairing of each condition with its action follows the
 order of the table cells on the page.
 
-Not retrieved: www.ssa.gov refuses automated requests, so this file does **not** include
-the Guide for Organizational Representative Payees, the SSA-6234 blank form, or the
-Monthly Beneficiary Accounting Ledger exhibit. Anything said about those comes from other
-sources and is marked as such in `MODULE_J_REPORTING.md`.
+The SSA-6234-F6 form (08-2013 edition) was supplied by the user on 2026-10-30 and is quoted in §12.
+
+Not retrieved: www.ssa.gov refuses automated requests, so this file does **not** include the
+Guide for Organizational Representative Payees or the Monthly Beneficiary Accounting Ledger exhibit.
 
 ---
 
@@ -193,11 +193,96 @@ Source: https://secure.ssa.gov/poms.nsf/lnx/0200603020
 
 ---
 
+## 12. Form SSA-6234-F6 (08-2013), Representative Payee Report (organizational payees)
+
+Source: PDF supplied by the user, saved as `sources/SSA-6234-F6_08-2013.pdf`. OMB No. 0960-0068.
+The F6 version asks the same questions as the mailed SSA-6234-OCR-SM (§4).
+
+**Instructions page: what to keep**
+
+> You must report to SSA on your use of benefits if you received any Social Security and/or SSI payments during the 12 month period shown on the enclosed form.
+
+> Any records you have saved such as bank statements, cancelled checks, receipts for rent, etc., should be kept for two years from the time you file your report with SSA. You should not send in any of these records with your report form.
+
+> 4. Show money amounts in dollars only. Do not show cents.
+
+> 8. Be sure you, the representative payee, sign the form.
+
+**Definitions**
+
+> Fees - Money collected from a beneficiary for payee or guardianship services.
+
+> Report Period - The 12-month period shown on the report for which you must account for the benefits you received.
+
+> Total Accountable Amount - The amount of benefits paid to you during the report period plus any amount you reported as saved on last year's report.
+
+**How to fill out the form** (instruction text for each question)
+
+> QUESTION 1 – Beneficiary Custody Changes: Place an "X" in the "YES" box if the beneficiary continued to live alone, or with the same person, or in the same institution during the entire report period. Place an "X" in the "NO" box if different people or different institutions took care of the beneficiary during any part of the report period. Explain the change and provide the beneficiary's current address under REMARKS.
+
+> A. Who Decided How Benefits Were Used?: Place an "X" in the "YES" box if you (the payee) decided how the benefits were spent or saved. Place an "X" in the "NO" box if the beneficiary or someone else decided how to use the money, and explain under REMARKS.
+
+> B. Did You Charge A Fee? And How Much Did You Collect?: Place an "X" in the "YES" box if you charged the beneficiary a fee for payee or guardianship services you provided during the report period and show the total amount of benefits you collected from the beneficiary.
+
+> C. Food and Housing: Show the total amount of benefits spent for food and housing for the beneficiary during the report period.
+
+> D. Personal Items: Show the total amount of benefits spent on clothing, medical/dental care, education, and recreational items like toys, movies, cameras, radios, candy, stationary, grooming aids, etc. during the report period. Note: If the beneficiary lives in an institution or other care facility, you should spend at least $360 a year for the beneficiary's personal needs. If you spent less than $360, explain under REMARKS.
+
+> E. Unused Benefits: Show the amount of benefits you saved for the beneficiary at the end of the report period including any interest earned. Show zeroes if you did not save any of the benefits.
+
+Question 3, Savings Information:
+
+> Answer this question if you showed an amount in 2E.
+
+> A. Type Of Account: Place an "X" in the box which shows how you are saving the benefits. Place an "X" in the "Other" box if your method of saving the benefits is not listed.
+
+> B. Account Title: Place an "X" in the box which most accurately describes the wording of the account title you have on the beneficiary's savings. Place an "X" in the "Other" box if the account title is different or if you have not placed the savings in any type of account.
+
+Question 4, Other Savings/Account Titles:
+
+> Answer this question only if you checked "OTHER" in 3.A. or 3.B.
+
+> A. Type Of Account: Indicate whether the saved benefits are in cash, Treasury Bills, or some other investment such as mutual funds. For mutual funds, be sure to show the name of the fund in your response (e.g., "XYZ Growth" mutual fund).
+
+> B. Title Of Account: Show the title of the account if the savings are in an account or other investment. Show "none" if the savings are not in an account or investment.
+
+> C. Payee's Signature: … If the payee is an organization, an authorized person must sign the form. This includes the signature of those employees designated to complete the report on behalf of the payee.
+
+> D. Job Title: If you represent an organization, show your job title (e.g., administrator, bookkeeper, etc.).
+
+**Form face** (the lines the payee fills in; blank fill-in spaces removed, so words that sat on either side of a blank now run together)
+
+> 2. Benefits paid to you between and
+> Benefits you reported as saved on last year's report
+> Total Accountable Amount
+
+> C. How much of the did you spend for the beneficiary's food and housing between
+
+> D. How much of the did you spend on other things for the beneficiary such as clothing, education, medical and dental expenses, recreation, or personal items between
+
+Question 3 check boxes, transcribed from the form's layout (not a single text run):
+3.A TYPE OF ACCOUNT: Savings/Checking Account · U.S. Savings Bonds · Certificates of Deposit ·
+Collective Savings/Checking Account · Treasury Bills · Other.
+3.B TITLE OF ACCOUNT: Beneficiary's Name by Your Name · Your Name for Beneficiary's Name · Other.
+
+> I declare under penalty of perjury that I have examined all the information on this form, and on any accompanying statements or forms, and it is true and correct to the best of my knowledge.
+
+**Duties page**
+
+> If you are no longer payee for the beneficiary, you must return any Social Security funds you have saved to SSA.
+
+> In addition to reporting on the use of benefits, you must report any changes which may affect the beneficiary's eligibility for benefits, or the payment amount.
+
+---
+
 ## Must vs. should, at a glance
 
 | Duty | Word used | Source |
 |---|---|---|
-| Account for use of benefits; report at least yearly | must / require | § 404.2065(a), § 416.665(a) |
+| Account for use of benefits; report at least yearly | must / require | § 404.2065(a), § 416.665(a); SSA-6234 instructions |
+| Keep bank statements, cancelled checks, receipts for two years from filing | should | SSA-6234 instructions (§12) |
+| Spend at least $360 a year on personal needs for a beneficiary in an institution | should (explain in REMARKS if less) | SSA-6234 Q2D (§12) |
+| Return saved funds to SSA when no longer payee | must | SSA-6234 duties page (§12) |
 | Keep records of how benefits were used | **should** | § 404.2065(c), § 416.665(c) |
 | Make those records available on request | must | § 404.2065(c), § 416.665(c) |
 | Per-beneficiary ledger of deposits, expenditures, transfers (collective accounts) | **must** | GN 00603.020 D.3 |

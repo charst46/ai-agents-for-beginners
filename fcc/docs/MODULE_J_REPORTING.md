@@ -156,7 +156,7 @@ FUNCTION monthly_reconciliation(collective_account, month) :
         stmt = this participant's deposits and interest on the monthly collective account statement
         ledg = DEPOSIT_SS + DEPOSIT_SSI + INTEREST entries in the ledger for month
         IF stmt != ledg → finding REVIEW_REQUIRED "D.3.a deposits/interest do not reconcile"
-    // Additional control:  [DESIGN]  (FCC already has verify_1013_to_2150)
+    // Additional control:  [DESIGN]  (FCC has an aggregate cash-to-liability check)
     IF statement ending balance != Σ participant closing balances held in this account
         → finding CRITICAL "collective account does not equal sum of beneficiary balances"
     RETURN { month, per_participant_results, aggregate_result,
@@ -179,7 +179,7 @@ FUNCTION annual_report_draft(participant, report_period) :
 
     IF payee.is_exempt :                                               // [REG] (b)
         RETURN records_only_notice                                     // records still kept and available, [REG] (c)
-        // Organizations are never in (b)(1)–(4). For More Maitri this branch never runs.
+        // Organizations are never in (b)(1)–(4), so for an organizational payee this branch never runs.
 
     benefits_received     = Σ DEPOSIT_SS + DEPOSIT_SSI in report_period
     prior_conserved_funds = saved_end_of_period from the last filed report
@@ -292,10 +292,10 @@ FUNCTION screening_checks(draft, participant) :
 | Need | FCC today | Gap |
 |---|---|---|
 | Correct balance direction | `abs()` makes outgoing "reimbursement" items increase the balance | **Bug.** Apply the J.1 sign rule |
-| Per-transaction ledger | Year-end totals per resident only | Build J.1 / J.3 |
+| Per-transaction ledger | Year-end totals per beneficiary only | Build J.1 / J.3 |
 | Whom paid, date, amount on each expenditure | Memo text stripped from client-safe output | Keep in the protected ledger; client-safe view can mask names |
 | SS vs SSI deposits listed separately | Classified only as BENEFIT_RECEIPT | Record the program on each deposit |
 | Interest allocation | All interest sent to review | Implement J.2 |
-| Food/housing vs other | One RESIDENT_DISBURSEMENT class | Add `use_category` |
-| Monthly reconciliation | `verify_1013_to_2150` (aggregate only) | Add the per-beneficiary deposit/interest check (J.3) |
-| Fee tracking | None | Add FEE entries if More Maitri is authorized to charge fees (unknown) |
+| Food/housing vs other | One disbursement class for all spending | Add `use_category` |
+| Monthly reconciliation | Aggregate cash-to-liability check only, with the client's account numbers hard-coded | Make the account numbers configuration; add the per-beneficiary deposit/interest check (J.3) |
+| Fee tracking | None | Add FEE entries; enable only for payees SSA has authorized to charge fees |
